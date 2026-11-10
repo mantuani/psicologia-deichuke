@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>psicologia deichuke</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0e0c11; --panel:#17141c; --panel2:#201b27; --line:#2e2836;
+  --text:#ece6f2; --muted:#9a90a8; --red:#ff5a45; --red2:#ff8a70;
+  --purple:#b58cff; --green:#5fd39a; --yellow:#ffd166;
+  --r:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',system-ui,sans-serif}
+body{min-height:100vh;padding-bottom:96px}
+button{font:inherit;color:inherit;cursor:pointer;border:none;background:none}
+input,textarea,select{font:inherit;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;width:100%}
+textarea{resize:vertical;min-height:80px}
+.wrap{max-width:640px;margin:0 auto;padding:20px 18px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
+header svg{flex:none}
+h1{font-family:'Caveat',cursive;font-size:38px;line-height:1;color:var(--red)}
+.sub{color:var(--muted);font-size:14px;margin-bottom:16px}
+h2{font-size:18px;margin:4px 0 12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.stack>*+*{margin-top:12px}
+.row{display:flex;gap:10px;align-items:center}
+.between{justify-content:space-between}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel2);font-size:14px;transition:.15s}
+.chip.on{background:var(--red);border-color:var(--red);color:#1a0d0b;font-weight:600}
+.chip.on .muted{color:#4a1f18}
+.btn{padding:13px 16px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);font-weight:600;text-align:center}
+.btn.primary{background:var(--red);border-color:var(--red);color:#1a0d0b}
+.btn.ghost{background:transparent}
+.btn.full{width:100%}
+.btn:active{transform:scale(.98)}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.stat{flex:1;text-align:center;padding:12px 6px}
+.stat b{display:block;font-size:24px}
+.stat span{font-size:12px;color:var(--muted)}
+
+/* níveis */
+.levels{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.lv{padding:10px 4px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);text-align:center;transition:.15s}
+.lv b{display:block;font-size:14px}
+.lv span{display:block;font-size:10px;color:var(--muted);margin-top:2px;letter-spacing:.5px}
+.lv.on{background:#2a1714;border-color:var(--red)}
+.lv.on b{color:var(--red)}
+.lv.in{border-color:#5a2a25}
+.lvname{font-family:'Caveat',cursive;font-size:24px;color:var(--purple)}
+.toggle{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.sw{width:38px;height:22px;border-radius:99px;background:var(--panel2);border:1px solid var(--line);position:relative;transition:.2s;flex:none}
+.sw::after{content:'';position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:var(--muted);transition:.2s}
+.sw.on{background:var(--red);border-color:var(--red)}
+.sw.on::after{left:18px;background:#1a0d0b}
+
+/* nav */
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(14,12,17,.92);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));z-index:5}
+nav .in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+nav button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;border-radius:12px;font-size:12px;color:var(--muted)}
+nav button.on{color:var(--red);background:var(--panel)}
+nav svg{width:22px;height:22px}
+
+.view{display:none}.view.on{display:block}
+
+/* flashcard */
+.flip{perspective:1200px;height:300px;margin:6px 0 14px}
+.flip .inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
+.flip.turned .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:20px;padding:24px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1px solid var(--line)}
+.front{background:linear-gradient(160deg,#211b29,#16121b)}
+.back{background:linear-gradient(160deg,#2a1714,#17110f);transform:rotateY(180deg);border-color:#4a2620}
+.face .tag{position:absolute;top:14px;left:16px;right:16px;text-align:left;font-size:12px;color:var(--muted)}
+.face .hint{position:absolute;bottom:14px;font-size:12px;color:var(--muted)}
+.face .q{font-size:22px;font-weight:600;line-height:1.3}
+.face .a{font-family:'Caveat',cursive;font-size:28px;line-height:1.25;color:var(--red2)}
+.grades{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.grades .btn{padding:12px 6px;font-size:14px}
+.g-bad{border-color:#5a2a25!important;color:#ff8a7a}
+.g-mid{border-color:#5a4a20!important;color:var(--yellow)}
+.g-ok{border-color:#1f4a35!important;color:var(--green)}
+.bar{height:6px;background:var(--panel2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--red);transition:width .3s}
+
+/* jogos menu */
+.games{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.game{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;text-align:left;transition:.15s}
+.game:active{transform:scale(.98)}
+.game .ic{font-size:28px;display:block;margin-bottom:8px}
+.game b{display:block;font-size:16px;margin-bottom:4px}
+.game span{font-size:12px;color:var(--muted);line-height:1.35;display:block}
+.game .best{margin-top:8px;color:var(--purple);font-size:12px}
+.back-btn{color:var(--muted);font-size:14px;padding:6px 0;margin-bottom:10px}
+
+/* quiz */
+.opt{width:100%;text-align:left;padding:14px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);line-height:1.35}
+.opt.right{border-color:var(--green);background:#14291f}
+.opt.wrong{border-color:var(--red);background:#2b1513}
+.opt:disabled{cursor:default}
+
+/* memória */
+.mem{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{position:relative;min-height:104px;perspective:800px}
+.tile .tin{position:absolute;inset:0;transition:transform .35s;transform-style:preserve-3d}
+.tile.open .tin,.tile.done .tin{transform:rotateY(180deg)}
+.tile .tf,.tile .tb{position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;align-items:center;justify-content:center;padding:8px;text-align:center}
+.tile .tf{background:var(--panel2);border:1px solid var(--line);font-family:'Caveat',cursive;font-size:30px;color:#4a3f55}
+.tile .tb{transform:rotateY(180deg);font-size:12px;line-height:1.25;overflow:hidden}
+.tile .tb.t{background:#1e1729;border:1px solid var(--purple);font-weight:600;font-size:13px}
+.tile .tb.r{background:#2a1714;border:1px solid var(--red)}
+.tile.done .tb{background:#14291f;border-color:var(--green)}
+.tile.done{opacity:.75}
+
+/* ligue */
+.match{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mcol{display:flex;flex-direction:column;gap:8px}
+.mi{padding:12px 10px;border-radius:12px;background:var(--panel2);border:1px solid var(--line);font-size:13px;line-height:1.3;text-align:left;min-height:62px}
+.mi.l{font-weight:600}
+.mi.sel{border-color:var(--purple);background:#1e1729}
+.mi.ok{border-color:var(--green);background:#14291f;opacity:.6}
+.mi.bad{border-color:var(--red);animation:shake .35s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+/* V ou F */
+.vf{min-height:230px;display:flex;flex-direction:column;justify-content:center;text-align:center}
+.vf .term{font-size:20px;font-weight:600;margin-bottom:12px}
+.vf .eq{color:var(--muted);font-size:13px;margin-bottom:10px}
+.vf .def{font-family:'Caveat',cursive;font-size:27px;color:var(--red2);line-height:1.25}
+.vfb{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.vfb .btn{padding:18px;font-size:18px}
+.flash-ok{animation:fok .4s}.flash-bad{animation:fbad .4s}
+@keyframes fok{0%{box-shadow:0 0 0 3px var(--green)}100%{box-shadow:0 0 0 0 transparent}}
+@keyframes fbad{0%{box-shadow:0 0 0 3px var(--red)}100%{box-shadow:0 0 0 0 transparent}}
+
+/* timer */
+.ring{position:relative;width:240px;height:240px;margin:10px auto}
+.ring svg{transform:rotate(-90deg)}
+.ring .t{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .t b{font-size:52px;font-variant-numeric:tabular-nums}
+.ring .t span{color:var(--muted);font-size:14px}
+.num{width:80px;text-align:center}
+
+.deckitem{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.deckitem:last-child{border:none}
+.grp{font-size:12px;color:var(--purple);letter-spacing:.5px;margin-top:10px;text-transform:uppercase}
+.grp:first-child{margin-top:0}
+.list-card{padding:10px 12px;background:var(--panel2);border-radius:10px;font-size:14px;display:flex;justify-content:space-between;gap:10px}
+.x{color:var(--muted);padding:0 4px}
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:999px;font-weight:600;font-size:14px;opacity:0;transition:.25s;pointer-events:none;z-index:9;white-space:nowrap}
+.toast.on{opacity:1}
+.empty{text-align:center;padding:30px 10px}
+.empty .big{font-family:'Caveat',cursive;font-size:34px;color:var(--purple)}
+.hud{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);margin-bottom:10px}
+.hud b{color:var(--text)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+      <circle cx="20" cy="16" r="11" fill="#ff5a45"/>
+      <circle cx="16" cy="15" r="3" fill="#0e0c11"/><circle cx="24" cy="15" r="3" fill="#0e0c11"/>
+      <path d="M18 20l2-2 2 2z" fill="#0e0c11"/>
+      <rect x="14" y="25" width="12" height="5" rx="1.5" fill="#ff5a45"/>
+      <path d="M16 25v5M18.7 25v5M21.3 25v5M24 25v5" stroke="#0e0c11" stroke-width="1"/>
+    </svg>
+    <h1>psicologia deichuke</h1>
+  </header>
+  <p class="sub" id="greet">revisar sem ficar com olheiras 💀</p>
+
+  <!-- seletor de nível (Revisar e Jogos) -->
+  <div id="levelBox" class="card" style="margin-bottom:16px">
+    <div class="row between" style="margin-bottom:10px">
+      <span class="lvname" id="lvName">Básico</span>
+      <button class="toggle" id="cumBtn"><span>somar anteriores</span><span class="sw" id="cumSw"></span></button>
+    </div>
+    <div class="levels" id="levels"></div>
+  </div>
+
+  <!-- REVISAR -->
+  <section class="view on" id="v-cards">
+    <div class="card row" style="padding:6px;margin-bottom:14px">
+      <div class="stat"><b id="s-due">0</b><span>pra revisar hoje</span></div>
+      <div class="stat"><b id="s-master">0</b><span>dominados</span></div>
+      <div class="stat"><b id="s-streak">0</b><span>dias seguidos 🔥</span></div>
+    </div>
+    <h2>Temas</h2>
+    <div class="chips" id="deckChips"></div>
+    <div class="row" style="margin:14px 0 4px">
+      <button class="chip on" id="mDue">Só os de hoje</button>
+      <button class="chip" id="mAll">Todos</button>
+    </div>
+    <div id="studyArea" style="margin-top:14px"></div>
+  </section>
+
+  <!-- JOGOS -->
+  <section class="view" id="v-jogos">
+    <div id="gameMenu">
+      <h2>Temas</h2>
+      <div class="chips" id="gameChips" style="margin-bottom:18px"></div>
+      <h2>Escolha um jeito de estudar</h2>
+      <div class="games">
+        <button class="game" data-g="mem"><span class="ic">🧠</span><b>Jogo da memória</b><span>Ache o par de cada conceito com a sua definição.</span><div class="best" id="best-mem"></div></button>
+        <button class="game" data-g="vf"><span class="ic">⚡</span><b>V ou F relâmpago</b><span>60 segundos. A definição está certa ou errada?</span><div class="best" id="best-vf"></div></button>
+        <button class="game" data-g="lig"><span class="ic">🔗</span><b>Ligue os pares</b><span>Conecte cada termo à definição certa.</span><div class="best" id="best-lig"></div></button>
+        <button class="game" data-g="quiz"><span class="ic">📝</span><b>Simulado</b><span>Múltipla escolha, estilo prova.</span><div class="best" id="best-quiz"></div></button>
+      </div>
+    </div>
+    <div id="gameArea"></div>
+  </section>
+
+  <!-- FOCO -->
+  <section class="view" id="v-foco">
+    <h2>Modo foco</h2>
+    <p class="muted small" style="margin:-6px 0 4px">Pomodoro: estuda um bloco, descansa um pouco, repete.</p>
+    <div class="ring">
+      <svg width="240" height="240" viewBox="0 0 240 240">
+        <circle cx="120" cy="120" r="108" fill="none" stroke="#201b27" stroke-width="12"/>
+        <circle id="ringFg" cx="120" cy="120" r="108" fill="none" stroke="#ff5a45" stroke-width="12" stroke-linecap="round" stroke-dasharray="678.6" stroke-dashoffset="0"/>
+      </svg>
+      <div class="t"><b id="tTime">25:00</b><span id="tLabel">foco</span></div>
+    </div>
+    <div class="row" style="justify-content:center;margin-bottom:16px">
+      <button class="btn primary" id="tGo" style="min-width:130px">Iniciar</button>
+      <button class="btn" id="tReset">Zerar</button>
+      <button class="btn ghost" id="tSkip">Pular</button>
+    </div>
+    <div class="card stack">
+      <div class="row between"><span>Foco (min)</span><input class="num" type="number" id="tFocus" min="1" max="90" value="25"></div>
+      <div class="row between"><span>Pausa (min)</span><input class="num" type="number" id="tBreak" min="1" max="30" value="5"></div>
+      <div class="row between"><span>Blocos hoje</span><b id="tDone">0</b></div>
+    </div>
+  </section>
+
+  <!-- MEUS CARDS -->
+  <section class="view" id="v-decks">
+    <h2>Todos os temas</h2>
+    <div class="card" id="deckList"></div>
+
+    <h2 style="margin-top:22px">Criar card</h2>
+    <form class="card stack" id="addForm">
+      <select id="addDeck"></select>
+      <div id="newDeckBox" style="display:none" class="stack">
+        <input id="newDeckName" placeholder="Nome do novo tema">
+        <select id="newDeckLv"></select>
+      </div>
+      <textarea id="addFront" placeholder="Termo / pergunta (ex.: Reforço negativo)" required></textarea>
+      <textarea id="addBack" placeholder="Definição / resposta" required></textarea>
+      <button class="btn primary full" type="submit">Adicionar card</button>
+    </form>
+
+    <div id="deckDetail"></div>
+
+    <h2 style="margin-top:22px">Backup</h2>
+    <div class="card stack">
+      <p class="muted small">Tudo fica salvo só neste navegador. Copie o backup pra guardar ou passar pra outro aparelho.</p>
+      <div class="row"><button class="btn" style="flex:1" id="bCopy">Copiar backup</button><button class="btn" style="flex:1" id="bShowImp">Importar</button></div>
+      <div id="impBox" style="display:none" class="stack">
+        <textarea id="impText" placeholder="Cole aqui o backup"></textarea>
+        <button class="btn primary full" id="bImp">Importar backup</button>
+      </div>
+      <button class="btn ghost full small muted" id="bReset">Resetar progresso das revisões</button>
+    </div>
+  </section>
+</div>
+
+<nav><div class="in">
+  <button class="on" data-v="cards"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="14" height="16" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v14"/></svg>Revisar</button>
+  <button data-v="jogos"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="11" rx="5"/><path d="M7 11v3M5.5 12.5h3"/><circle cx="16" cy="11.5" r=".8" fill="currentColor"/><circle cx="18" cy="13.5" r=".8" fill="currentColor"/></svg>Jogos</button>
+  <button data-v="foco"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg>Foco</button>
+  <button data-v="decks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>Meus cards</button>
+</div></nav>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= CONTEÚDO ================= */
+const LV=[null,
+ {s:'1º–2º',n:'Básico'},
+ {s:'3º–4º',n:'Fundamentos'},
+ {s:'5º–6º',n:'Intermediário'},
+ {s:'7º–8º',n:'Avançado'},
+ {s:'9º–10º',n:'Profissional'}];
+
+const SEED=[
+/* ---------- 1º–2º BÁSICO ---------- */
+{id:'cel',lv:1,name:'Célula eucariótica',cards:[
+ ['Célula eucariótica x procariótica','A eucariótica tem núcleo delimitado pela carioteca e organelas envoltas por membrana'],
+ ['Mitocôndria','Respiração celular: produz energia (ATP). Tem DNA próprio'],
+ ['Ribossomo','Síntese de proteínas'],
+ ['Retículo endoplasmático rugoso','Tem ribossomos aderidos: produz e transporta proteínas'],
+ ['Retículo endoplasmático liso','Sem ribossomos: produz lipídios e faz desintoxicação'],
+ ['Complexo de Golgi','Modifica, empacota e secreta substâncias; origina os lisossomos'],
+ ['Lisossomo','Digestão intracelular, com enzimas digestivas'],
+ ['Peroxissomo','Decompõe peróxido de hidrogênio (H₂O₂) e oxida ácidos graxos'],
+ ['Núcleo','Guarda o DNA e controla as atividades da célula'],
+ ['Exclusivos da célula vegetal','Parede celular de celulose, cloroplastos e vacúolo central grande']]},
+{id:'mem',lv:1,name:'Membrana plasmática',cards:[
+ ['Modelo da membrana','Mosaico fluido (Singer e Nicolson, 1972)'],
+ ['Composição da membrana','Bicamada de fosfolipídios com proteínas, colesterol e glicocálix'],
+ ['Permeabilidade seletiva','A membrana controla o que entra e sai da célula'],
+ ['Transporte passivo','A favor do gradiente, sem gastar ATP (difusão simples, facilitada e osmose)'],
+ ['Transporte ativo','Contra o gradiente, gastando ATP'],
+ ['Bomba de sódio e potássio','Transporte ativo: tira 3 Na⁺ e coloca 2 K⁺ na célula'],
+ ['Osmose','Água passa do meio menos concentrado (hipotônico) para o mais concentrado (hipertônico)'],
+ ['Fagocitose x pinocitose','Fagocitose engloba partículas sólidas; pinocitose engloba líquidos']]},
+{id:'cen',lv:1,name:'Centríolos e citoesqueleto',cards:[
+ ['Estrutura do centríolo','Cilindro de 9 trios de microtúbulos, arranjo 9+0'],
+ ['Microtúbulos são feitos de…','Tubulina'],
+ ['Centrossomo','Par de centríolos perpendiculares que organiza os microtúbulos'],
+ ['Centríolos na divisão celular','Duplicam-se e vão para polos opostos, organizando o fuso'],
+ ['Arranjo de cílios e flagelos','9+2: nove pares periféricos e um par central de microtúbulos'],
+ ['Corpúsculo basal','Estrutura igual ao centríolo, na base de cílios e flagelos']]},
+{id:'neu',lv:1,name:'Neurônio e sinapses',cards:[
+ ['Dendritos','Recebem os estímulos e levam até o corpo celular'],
+ ['Axônio','Conduz o impulso nervoso até os terminais'],
+ ['Corpo celular (soma)','Contém o núcleo e a maior parte das organelas do neurônio'],
+ ['Bainha de mielina','Isola o axônio e acelera o impulso (condução saltatória)'],
+ ['Quem forma a mielina','Oligodendrócitos no SNC e células de Schwann no SNP'],
+ ['Nódulos de Ranvier','Intervalos sem mielina onde o impulso "salta"'],
+ ['Potencial de repouso','Cerca de -70 mV (interior negativo)'],
+ ['Despolarização','Entrada de Na⁺ na célula'],
+ ['Repolarização','Saída de K⁺ da célula'],
+ ['Lei do tudo ou nada','Atingido o limiar, o potencial de ação ocorre sempre com a mesma intensidade'],
+ ['Sinapse química','Neurotransmissores atravessam a fenda sináptica até receptores do neurônio pós-sináptico'],
+ ['Sinapse elétrica','Íons passam direto por junções comunicantes (gap junctions); é mais rápida'],
+ ['Recaptação','O neurônio pré-sináptico reabsorve o neurotransmissor que sobrou na fenda']]},
+{id:'ntr',lv:1,name:'Neurotransmissores',cards:[
+ ['Dopamina','Recompensa, motivação e movimento; ligada a Parkinson e esquizofrenia'],
+ ['Serotonina','Humor, sono e apetite; alvo dos antidepressivos ISRS'],
+ ['Noradrenalina','Alerta e resposta de luta ou fuga'],
+ ['GABA','Principal neurotransmissor inibitório do SNC'],
+ ['Glutamato','Principal neurotransmissor excitatório; importante na memória e aprendizagem'],
+ ['Acetilcolina','Contração muscular (junção neuromuscular) e memória; ligada ao Alzheimer'],
+ ['Endorfinas','Analgesia e sensação de bem-estar']]},
+{id:'nan',lv:1,name:'Neuroanatomia',cards:[
+ ['Lobo frontal','Funções executivas, planejamento, controle motor e aspectos da personalidade'],
+ ['Lobo parietal','Sensações do corpo (tato, dor, temperatura) e noção espacial'],
+ ['Lobo temporal','Audição, memória e compreensão da linguagem'],
+ ['Lobo occipital','Processamento visual'],
+ ['Área de Broca','Produção da fala (lobo frontal, geralmente no hemisfério esquerdo)'],
+ ['Área de Wernicke','Compreensão da linguagem (lobo temporal)'],
+ ['Hipocampo','Formação de novas memórias declarativas'],
+ ['Amígdala','Processamento das emoções, principalmente do medo'],
+ ['Hipotálamo','Homeostase (fome, sede, temperatura) e controle da hipófise'],
+ ['Cerebelo','Coordenação motora e equilíbrio'],
+ ['Tronco encefálico','Mesencéfalo, ponte e bulbo; controla funções vitais como respiração'],
+ ['Simpático x parassimpático','Simpático: luta ou fuga. Parassimpático: repouso e digestão']]},
+{id:'his',lv:1,name:'História da Psicologia',cards:[
+ ['Marco da Psicologia científica','1879: Wundt funda o laboratório de Leipzig'],
+ ['Estruturalismo','Titchener: decompor a consciência em elementos pela introspecção'],
+ ['Funcionalismo','William James: a função adaptativa da consciência'],
+ ['Gestalt','Wertheimer, Köhler e Koffka: o todo é diferente da soma das partes'],
+ ['Behaviorismo (marco)','Watson, 1913: estudar só o comportamento observável'],
+ ['Psicanálise (origem)','Freud, fim do séc. XIX: o papel do inconsciente'],
+ ['Humanismo','Rogers e Maslow: a "terceira força" da Psicologia'],
+ ['Revolução cognitiva','Anos 1950–60: a mente como processadora de informação'],
+ ['Regulamentação da profissão no Brasil','Lei 4.119, de 27/08/1962 (por isso 27/08 é o Dia do Psicólogo)'],
+ ['Criação do CFP e dos CRPs','Lei 5.766/1971']]},
+{id:'met',lv:1,name:'Métodos de pesquisa',cards:[
+ ['Variável independente','A que o pesquisador manipula'],
+ ['Variável dependente','A que é medida; o efeito observado'],
+ ['Correlação x causalidade','Duas variáveis andarem juntas não prova que uma causa a outra'],
+ ['Grupo controle','Não recebe a intervenção; serve de comparação'],
+ ['Estudo duplo-cego','Nem participantes nem pesquisadores sabem quem recebeu a intervenção'],
+ ['Média, mediana e moda','Média: soma ÷ total. Mediana: valor do meio. Moda: valor mais frequente'],
+ ['Desvio padrão','Mede o quanto os dados se espalham em torno da média'],
+ ['Pesquisa quantitativa x qualitativa','Quantitativa mede com números; qualitativa busca significados e experiências'],
+ ['TCLE','Termo de Consentimento Livre e Esclarecido, exigido na pesquisa com seres humanos'],
+ ['Resoluções de ética em pesquisa','CNS 466/2012 e CNS 510/2016 (ciências humanas e sociais)']]},
+
+/* ---------- 3º–4º FUNDAMENTOS ---------- */
+{id:'ac',lv:2,name:'Análise do comportamento',cards:[
+ ['Condicionamento respondente','Pavlov: estímulo neutro pareado ao incondicionado passa a eliciar a resposta'],
+ ['Condicionamento operante','Skinner: o comportamento é controlado pelas suas consequências'],
+ ['Reforço positivo','Acrescenta um estímulo e aumenta a frequência do comportamento'],
+ ['Reforço negativo','Retira um estímulo aversivo e aumenta a frequência do comportamento'],
+ ['Punição positiva','Acrescenta um estímulo aversivo e diminui o comportamento'],
+ ['Punição negativa','Retira um estímulo agradável e diminui o comportamento'],
+ ['Extinção','Suspender o reforço; o comportamento diminui, às vezes após um pico inicial'],
+ ['Razão variável','Esquema mais resistente à extinção (ex.: jogos de azar)'],
+ ['Modelagem','Reforçar aproximações sucessivas até o comportamento final'],
+ ['Tríplice contingência','Antecedente → resposta → consequência']]},
+{id:'psa',lv:2,name:'Psicanálise (Freud)',cards:[
+ ['Id','Reservatório das pulsões; segue o princípio do prazer'],
+ ['Ego','Media id, superego e realidade; segue o princípio de realidade'],
+ ['Superego','Instância moral; herdeiro do complexo de Édipo'],
+ ['Primeira tópica','Inconsciente, pré-consciente e consciente'],
+ ['Fases psicossexuais','Oral, anal, fálica, latência e genital'],
+ ['Recalque','Defesa que mantém conteúdos insuportáveis fora da consciência'],
+ ['Projeção','Atribuir ao outro desejos ou sentimentos próprios inaceitáveis'],
+ ['Formação reativa','Expressar o oposto do impulso original'],
+ ['Associação livre','Regra fundamental: dizer tudo o que vier à mente'],
+ ['Transferência','Reviver com o analista afetos ligados a figuras do passado'],
+ ['Ato falho','Lapso que revela um desejo inconsciente']]},
+{id:'dev',lv:2,name:'Desenvolvimento humano',cards:[
+ ['Estágios de Piaget','Sensório-motor (0–2), pré-operatório (2–7), operatório concreto (7–11), operatório formal (12+)'],
+ ['Permanência do objeto','Conquista do estágio sensório-motor'],
+ ['Egocentrismo e falta de conservação','Características do estágio pré-operatório'],
+ ['Assimilação x acomodação','Assimilar: encaixar no esquema que já existe. Acomodar: mudar o esquema'],
+ ['Zona de desenvolvimento proximal','Vygotsky: distância entre o que a criança faz sozinha e o que faz com ajuda'],
+ ['Mediação (Vygotsky)','O desenvolvimento acontece mediado por signos, instrumentos e pelo outro'],
+ ['Erikson','8 estágios psicossociais; ex.: identidade x confusão de papéis na adolescência'],
+ ['Teoria do apego','Bowlby: o vínculo com o cuidador como base de segurança'],
+ ['Situação estranha','Ainsworth: apego seguro, evitativo e ambivalente (depois, desorganizado)'],
+ ['Kohlberg','Moral em três níveis: pré-convencional, convencional e pós-convencional']]},
+{id:'ppb',lv:2,name:'Processos psicológicos básicos',cards:[
+ ['Sensação x percepção','Sensação capta o estímulo; percepção organiza e interpreta'],
+ ['Efeito coquetel','Atenção seletiva: ouvir seu nome no meio do barulho'],
+ ['Modelo multiarmazenamento','Atkinson e Shiffrin: memória sensorial, de curto prazo e de longo prazo'],
+ ['Memória de trabalho','Baddeley e Hitch: manter e manipular informações por pouco tempo'],
+ ['Capacidade da memória de curto prazo','Miller: 7 ± 2 itens'],
+ ['Declarativa x não declarativa','Declarativa: fatos e episódios. Não declarativa: hábitos e procedimentos'],
+ ['Curva do esquecimento','Ebbinghaus: esquecemos rápido logo após aprender'],
+ ['Pirâmide de Maslow','Fisiológicas, segurança, sociais, estima e autorrealização'],
+ ['Teoria de James-Lange','A reação do corpo vem antes e gera a emoção'],
+ ['Teoria de Cannon-Bard','Reação do corpo e emoção acontecem ao mesmo tempo'],
+ ['Teoria de Schachter-Singer','Emoção = ativação fisiológica + interpretação cognitiva (dois fatores)']]},
+{id:'soc',lv:2,name:'Psicologia social',cards:[
+ ['Experimento de Asch','Conformidade: pessoas cedem à opinião errada do grupo'],
+ ['Experimento de Milgram','Obediência à autoridade'],
+ ['Dissonância cognitiva','Festinger: desconforto ao manter crenças e ações contraditórias'],
+ ['Erro fundamental de atribuição','Explicar o comportamento dos outros pela personalidade, ignorando a situação'],
+ ['Efeito espectador','Darley e Latané: quanto mais gente presente, menos alguém ajuda'],
+ ['Estereótipo, preconceito e discriminação','Crença, atitude (afeto) e comportamento, respectivamente'],
+ ['Representações sociais','Moscovici: saberes do senso comum construídos no grupo'],
+ ['Experimento da prisão de Stanford','Zimbardo, 1971: poder dos papéis sociais (muito criticado)']]},
+
+/* ---------- 5º–6º INTERMEDIÁRIO ---------- */
+{id:'per',lv:3,name:'Teorias da personalidade',cards:[
+ ['Inconsciente coletivo','Jung: camada herdada e comum a todos, com os arquétipos'],
+ ['Arquétipos de Jung','Persona, sombra, anima/animus e self'],
+ ['Tipos psicológicos','Jung: introversão/extroversão + pensamento, sentimento, sensação e intuição'],
+ ['Adler','Sentimento de inferioridade, estilo de vida e interesse social'],
+ ['Condições de Rogers','Congruência, consideração positiva incondicional e empatia'],
+ ['Big Five','Abertura, conscienciosidade, extroversão, amabilidade e neuroticismo'],
+ ['Bandura','Aprendizagem por observação e autoeficácia (experimento do boneco João Bobo)'],
+ ['Gestalt-terapia','Fritz Perls: aqui e agora e awareness'],
+ ['Logoterapia','Viktor Frankl: a busca de sentido como motivação central']]},
+{id:'pg',lv:3,name:'Psicopatologia geral',cards:[
+ ['Alucinação','Percepção sem objeto real'],
+ ['Ilusão','Percepção deformada de um objeto real'],
+ ['Delírio','Juízo falso, com convicção inabalável e não compartilhado culturalmente'],
+ ['Ideia obsessiva','Pensamento intrusivo e indesejado, vivido como estranho (egodistônico)'],
+ ['Fuga de ideias','Pensamento acelerado que perde o objetivo; típico da mania'],
+ ['Embotamento afetivo','Redução importante da expressão emocional'],
+ ['Anedonia','Perda da capacidade de sentir prazer'],
+ ['Despersonalização x desrealização','Estranheza em relação a si mesmo x em relação ao mundo'],
+ ['Orientação autopsíquica x alopsíquica','Saber quem é x saber onde e quando está'],
+ ['Psicopatologia Geral (1913)','Obra de Karl Jaspers, base da psicopatologia descritiva']]},
+{id:'ava',lv:3,name:'Avaliação psicológica',cards:[
+ ['Validade','O teste mede o que se propõe a medir'],
+ ['Fidedignidade (precisão)','O teste dá resultados consistentes'],
+ ['Normatização','Normas obtidas de um grupo de referência para comparar resultados'],
+ ['Alfa de Cronbach','Índice de consistência interna de um instrumento'],
+ ['SATEPSI','Sistema do CFP que lista os testes com parecer favorável para uso'],
+ ['Testes projetivos','Ex.: Rorschach, TAT e HTP'],
+ ['WISC e WAIS','Escalas Wechsler de inteligência: crianças e adultos'],
+ ['Avaliação x testagem','Avaliação é um processo amplo (entrevista, observação, testes); testagem é só uma parte']]},
+{id:'tcc',lv:3,name:'Terapia cognitivo-comportamental',cards:[
+ ['Fundador da TCC','Aaron Beck, anos 1960'],
+ ['Modelo cognitivo','A interpretação da situação, e não a situação em si, influencia emoção e comportamento'],
+ ['Pensamentos automáticos','Pensamentos rápidos e espontâneos que surgem nas situações'],
+ ['Crenças centrais','Ideias profundas e globais sobre si, os outros e o mundo'],
+ ['Crenças intermediárias','Regras, atitudes e pressupostos ("se eu errar, vão me rejeitar")'],
+ ['Catastrofização','Distorção: esperar sempre o pior desfecho'],
+ ['Leitura mental','Distorção: achar que sabe o que o outro está pensando'],
+ ['Questionamento socrático','Perguntas que ajudam o paciente a avaliar os próprios pensamentos'],
+ ['Modelo ABC','Ellis (TREC): evento ativador, crença e consequência'],
+ ['Terceira onda','ACT, DBT e terapias baseadas em mindfulness']]},
+
+/* ---------- 7º–8º AVANÇADO ---------- */
+{id:'dsm',lv:4,name:'Transtornos mentais',cards:[
+ ['Depressão maior','Humor deprimido ou anedonia + outros sintomas, por pelo menos 2 semanas'],
+ ['TAG','Preocupação excessiva na maioria dos dias por pelo menos 6 meses'],
+ ['Transtorno de pânico','Ataques inesperados e recorrentes + medo de novos ataques por 1 mês ou mais'],
+ ['TOC','Obsessões e/ou compulsões que tomam tempo ou causam sofrimento'],
+ ['TEPT','Após trauma: revivência, evitação, alterações de humor e hiperexcitação por mais de 1 mês'],
+ ['Bipolar I x II','I: pelo menos um episódio maníaco. II: hipomania + depressão, sem mania'],
+ ['Esquizofrenia','2+ sintomas psicóticos (um deles delírio, alucinação ou discurso desorganizado), sinais por 6 meses'],
+ ['TEA','Déficits na comunicação e interação social + padrões restritos e repetitivos'],
+ ['TDAH','Desatenção e/ou hiperatividade-impulsividade, com sintomas antes dos 12 anos em 2+ contextos'],
+ ['Borderline','Instabilidade nas relações, autoimagem e afetos, com impulsividade'],
+ ['DSM-5-TR x CID-11','DSM: Associação Americana de Psiquiatria. CID: Organização Mundial da Saúde']]},
+{id:'far',lv:4,name:'Psicofarmacologia',cards:[
+ ['ISRS','Inibem a recaptação de serotonina; ex.: fluoxetina e sertralina'],
+ ['Benzodiazepínicos','Potencializam o GABA; ansiolíticos com risco de dependência (ex.: clonazepam)'],
+ ['Antipsicóticos típicos','Bloqueiam D2; ex.: haloperidol; risco de efeitos extrapiramidais'],
+ ['Antipsicóticos atípicos','Ex.: risperidona e quetiapina; também agem na serotonina; risco metabólico'],
+ ['Lítio','Estabilizador de humor do bipolar; exige dosagem no sangue'],
+ ['Metilfenidato','Psicoestimulante usado no TDAH; aumenta dopamina e noradrenalina'],
+ ['Tempo de efeito dos antidepressivos','Costuma levar algumas semanas para o efeito aparecer'],
+ ['Psicólogo pode prescrever remédio?','Não. A prescrição é do médico']]},
+{id:'org',lv:4,name:'Psicologia organizacional',cards:[
+ ['Teoria dos dois fatores','Herzberg: fatores higiênicos x fatores motivacionais'],
+ ['Teoria X e Y','McGregor: visão do trabalhador como passivo (X) ou engajado (Y)'],
+ ['Burnout','CID-11: fenômeno ocupacional com exaustão, distanciamento do trabalho e baixa eficácia'],
+ ['Recrutamento x seleção','Recrutar atrai candidatos; selecionar escolhe entre eles'],
+ ['Clima x cultura organizacional','Clima: percepção do momento. Cultura: valores e crenças mais profundos'],
+ ['Psicodinâmica do trabalho','Christophe Dejours: prazer e sofrimento no trabalho'],
+ ['Avaliação 360°','Feedback de várias fontes: chefe, colegas, equipe e autoavaliação'],
+ ['NR-1 (atualizada em 2024)','Passou a incluir os riscos psicossociais no gerenciamento de riscos das empresas']]},
+{id:'esc',lv:4,name:'Psicologia escolar',cards:[
+ ['Queixa escolar','Olhar a rede (escola, família, criança) em vez de culpar só o aluno'],
+ ['Medicalização da educação','Tratar questões sociais e pedagógicas como doença individual'],
+ ['Lei 13.935/2019','Psicólogos e assistentes sociais na educação básica pública'],
+ ['A produção do fracasso escolar','Obra de Maria Helena Souza Patto'],
+ ['Lei Brasileira de Inclusão','Lei 13.146/2015'],
+ ['Escolar x educacional','Escolar: atuação na escola. Educacional: estudo do ensino-aprendizagem']]},
+{id:'sau',lv:4,name:'Psicologia da saúde e hospitalar',cards:[
+ ['Modelo biopsicossocial','Engel, 1977: saúde envolve fatores biológicos, psicológicos e sociais'],
+ ['Fases do luto (Kübler-Ross)','Negação, raiva, barganha, depressão e aceitação'],
+ ['Cuidados paliativos','Alívio do sofrimento e qualidade de vida em doenças que ameaçam a vida'],
+ ['Interconsulta','Atendimento feito a pedido de outra equipe ou especialidade'],
+ ['Adesão ao tratamento','O quanto o paciente segue as orientações combinadas'],
+ ['Política Nacional de Humanização','HumanizaSUS, 2003']]},
+
+/* ---------- 9º–10º PROFISSIONAL ---------- */
+{id:'eti',lv:5,name:'Ética profissional',cards:[
+ ['Código de Ética do psicólogo','Resolução CFP 010/2005'],
+ ['Quebra de sigilo','Só para o menor prejuízo, informando apenas o estritamente necessário'],
+ ['Induzir convicções','É vedado induzir convicções políticas, religiosas, morais ou de orientação sexual'],
+ ['Perícia com vínculo','É vedado ser perito ou avaliador de alguém com quem se tem vínculo'],
+ ['Atendimento de criança','Comunicar aos responsáveis só o estritamente essencial'],
+ ['Resolução CFP 01/1999','Proíbe tratar a homossexualidade como doença ou oferecer "cura"'],
+ ['Resolução CFP 01/2018','Orienta a atuação com pessoas transexuais e travestis, contra a patologização']]},
+{id:'doc',lv:5,name:'Documentos psicológicos',cards:[
+ ['Resolução dos documentos','Resolução CFP 06/2019'],
+ ['Tipos de documento','Declaração, atestado, relatório, laudo e parecer'],
+ ['Declaração','Informações objetivas como comparecimento e horários, sem sintomas'],
+ ['Atestado psicológico','Certifica uma condição psicológica, com base em avaliação'],
+ ['Laudo psicológico','Resultado de avaliação psicológica, com análise e conclusão'],
+ ['Parecer psicológico','Resposta técnica a uma questão específica, sem avaliação direta'],
+ ['Relatório psicológico','Comunica a atuação do psicólogo em um serviço ou caso'],
+ ['Guarda dos documentos','Mínimo de 5 anos']]},
+{id:'sus',lv:5,name:'Saúde mental e SUS',cards:[
+ ['Lei da Reforma Psiquiátrica','Lei 10.216/2001 (Lei Paulo Delgado)'],
+ ['RAPS','Rede de Atenção Psicossocial, Portaria 3.088/2011'],
+ ['CAPS III','Funciona 24 horas'],
+ ['CAPSi e CAPS AD','Infantojuvenil e álcool e outras drogas'],
+ ['Princípios do SUS','Universalidade, integralidade e equidade'],
+ ['Matriciamento','Apoio especializado compartilhado com as equipes da atenção básica'],
+ ['Residência terapêutica','Moradia para quem saiu de longas internações psiquiátricas'],
+ ['CRAS x CREAS','CRAS: proteção social básica. CREAS: proteção especial (direitos violados)']]},
+{id:'jur',lv:5,name:'Psicologia jurídica',cards:[
+ ['Perito x assistente técnico','Perito é nomeado pelo juiz; assistente técnico é contratado pela parte'],
+ ['ECA','Estatuto da Criança e do Adolescente, Lei 8.069/1990'],
+ ['Depoimento especial','Lei 13.431/2017: escuta protegida de crianças vítimas ou testemunhas de violência'],
+ ['Lei da Alienação Parental','Lei 12.318/2010'],
+ ['SINASE','Lei 12.594/2012: execução das medidas socioeducativas'],
+ ['Guarda compartilhada','Virou regra com a Lei 13.058/2014']]},
+{id:'np',lv:5,name:'Neuropsicologia',cards:[
+ ['Funções executivas','Planejamento, controle inibitório, flexibilidade cognitiva e memória de trabalho'],
+ ['Phineas Gage','1848: lesão frontal e mudança de personalidade'],
+ ['Paciente H.M.','Retirada do lobo temporal medial (hipocampo) e amnésia anterógrada'],
+ ['Amnésia anterógrada x retrógrada','Não forma memórias novas x perde memórias antigas'],
+ ['Afasia de Broca x Wernicke','Broca: fala pouco fluente. Wernicke: fala fluente, mas sem sentido'],
+ ['Heminegligência','Geralmente por lesão parietal direita: ignora o lado esquerdo'],
+ ['Teste de Stroop','Avalia controle inibitório e atenção'],
+ ['Wisconsin (WCST)','Avalia flexibilidade cognitiva'],
+ ['Neuroplasticidade','Capacidade do cérebro de se reorganizar com a experiência']]}
+];
+
+/* ================= ESTADO ================= */
+const KEY='deichuke-v1';
+let S;
+const mkDeck=d=>({id:d.id,lv:d.lv,name:d.name,cards:d.cards.map((c,i)=>({id:d.id+i,f:c[0],b:c[1],box:0,due:0}))});
+function blank(){return {decks:SEED.map(mkDeck),sel:SEED.map(d=>d.id),removed:[],level:1,cum:false,
+  pomo:{date:'',done:0,focus:25,brk:5},streak:{last:'',n:0},best:{}}}
+function load(){
+  try{const r=localStorage.getItem(KEY);if(r)S=JSON.parse(r)}catch(e){}
+  if(!S)S=blank();
+  S.removed=S.removed||[];S.best=S.best||{};S.streak=S.streak||{last:'',n:0};
+  SEED.forEach(d=>{if(!S.decks.some(x=>x.id===d.id)&&!S.removed.includes(d.id)){S.decks.push(mkDeck(d));S.sel.push(d.id)}});
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+load();
+
+const DAY=864e5, INTERVALS=[0,1,3,7,14,30];
+const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d.getTime()};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),1800)}
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return a};
+const visibleDecks=()=>S.decks.filter(d=>S.cum?d.lv<=S.level:d.lv===S.level);
+const activeDecks=()=>visibleDecks().filter(d=>S.sel.includes(d.id));
+const pool=()=>activeDecks().flatMap(d=>d.cards.map(c=>({...c,deck:d})));
+const lvTag=d=>LV[d.lv]?LV[d.lv].s+' · ':'';
+
+function studied(){
+  const t=new Date().toDateString();
+  if(S.streak.last===t)return;
+  const y=new Date(Date.now()-DAY).toDateString();
+  S.streak.n = S.streak.last===y ? S.streak.n+1 : 1;
+  S.streak.last=t;save();
+}
+function streakNow(){
+  const t=new Date().toDateString(),y=new Date(Date.now()-DAY).toDateString();
+  return (S.streak.last===t||S.streak.last===y)?S.streak.n:0;
+}
+
+/* ================= NAV ================= */
+let curView='cards';
+function go(v){
+  curView=v;
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x.dataset.v===v));
+  document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v-'+v));
+  $('#levelBox').style.display=(v==='cards'||v==='jogos')?'block':'none';
+  window.scrollTo(0,0);
+  if(v==='decks')renderDecks();
+  if(v==='cards')renderCards();
+  if(v==='jogos'){stopGame();renderGameMenu()}
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>go(b.dataset.v));
+
+(function(){const h=new Date().getHours();
+ $('#greet').textContent = h>=23||h<5 ? 'já tá tarde... revisa um pouquinho e vai dormir 💀' : h<12 ? 'bom dia! bora estudar 🌿' : h<18 ? 'boa tarde! bora estudar ☕' : 'boa noite! estudar sem ficar com olheiras 💀';})();
+
+/* ================= NÍVEIS ================= */
+function renderLevels(){
+  $('#levels').innerHTML=LV.slice(1).map((l,i)=>{const n=i+1;
+    const cls=n===S.level?'on':(S.cum&&n<S.level?'in':'');
+    return `<button class="lv ${cls}" data-lv="${n}"><b>${l.s}</b><span>${'●'.repeat(n)}${'○'.repeat(5-n)}</span></button>`}).join('');
+  $('#lvName').textContent=LV[S.level].n+(S.cum&&S.level>1?' + anteriores':'');
+  $('#cumSw').classList.toggle('on',S.cum);
+  document.querySelectorAll('.lv').forEach(b=>b.onclick=()=>{S.level=+b.dataset.lv;save();refresh()});
+}
+$('#cumBtn').onclick=()=>{S.cum=!S.cum;save();refresh()};
+function refresh(){renderLevels();if(curView==='cards')renderCards();if(curView==='jogos'){stopGame();renderGameMenu()}}
+
+function chips(el,onChange){
+  const ds=visibleDecks();
+  el.innerHTML=ds.map(d=>`<button class="chip ${S.sel.includes(d.id)?'on':''}" data-id="${d.id}">${esc(d.name)} <span class="muted small">${d.cards.length}</span></button>`).join('')||'<p class="muted small">Nenhum tema neste nível ainda.</p>';
+  el.querySelectorAll('.chip').forEach(c=>c.onclick=()=>{
+    const id=c.dataset.id;
+    S.sel=S.sel.includes(id)?S.sel.filter(x=>x!==id):[...S.sel,id];
+    save();onChange();
+  });
+}
+
+/* ================= REVISAR ================= */
+let mode='due', queue=[], qi=0;
+$('#mDue').onclick=()=>{mode='due';$('#mDue').classList.add('on');$('#mAll').classList.remove('on');buildQueue()};
+$('#mAll').onclick=()=>{mode='all';$('#mAll').classList.add('on');$('#mDue').classList.remove('on');buildQueue()};
+function stats(){
+  const all=visibleDecks().flatMap(d=>d.cards),t=today();
+  $('#s-due').textContent=all.filter(c=>c.due<=t).length;
+  $('#s-master').textContent=all.filter(c=>c.box>=4).length+'/'+all.length;
+  $('#s-streak').textContent=streakNow();
+}
+function renderCards(){chips($('#deckChips'),renderCards);stats();buildQueue()}
+function buildQueue(){
+  const t=today();let cs=pool();
+  if(mode==='due')cs=cs.filter(c=>c.due<=t);
+  queue=shuffle(cs).sort((a,b)=>a.box-b.box);qi=0;showCard();
+}
+function showCard(){
+  const A=$('#studyArea');
+  if(!activeDecks().length){A.innerHTML=`<div class="card empty"><div class="big">nenhum tema</div><p class="muted">Escolha pelo menos um tema acima.</p></div>`;return}
+  if(qi>=queue.length){
+    A.innerHTML=`<div class="card empty"><div class="big">${queue.length?'acabou! 🎉':'tudo em dia ✨'}</div>
+      <p class="muted" style="margin:6px 0 14px">${queue.length?`Você revisou ${queue.length} card${queue.length>1?'s':''}.`:'Nenhum card pra revisar hoje nesses temas.'}</p>
+      <div class="row"><button class="btn" style="flex:1" id="again">Revisar todos</button><button class="btn primary" style="flex:1" id="toGames">Ir pros jogos</button></div></div>`;
+    $('#again').onclick=()=>$('#mAll').click();$('#toGames').onclick=()=>go('jogos');stats();return;
+  }
+  const c=queue[qi];
+  A.innerHTML=`
+   <div class="row between small muted"><span>${qi+1} de ${queue.length}</span><span>nível ${c.box}/5</span></div>
+   <div class="bar" style="margin:8px 0 4px"><i style="width:${qi/queue.length*100}%"></i></div>
+   <div class="flip" id="flip"><div class="inner">
+     <div class="face front"><span class="tag">${lvTag(c.deck)}${esc(c.deck.name)}</span><div class="q">${esc(c.f)}</div><span class="hint">toque pra ver a resposta</span></div>
+     <div class="face back"><span class="tag">${lvTag(c.deck)}${esc(c.deck.name)}</span><div class="a">${esc(c.b)}</div></div>
+   </div></div>
+   <div class="grades" id="grades" style="visibility:hidden">
+     <button class="btn g-bad" data-g="0">Errei</button>
+     <button class="btn g-mid" data-g="1">Difícil</button>
+     <button class="btn g-ok" data-g="2">Acertei</button>
+   </div>`;
+  $('#flip').onclick=()=>{$('#flip').classList.toggle('turned');$('#grades').style.visibility='visible'};
+  document.querySelectorAll('#grades .btn').forEach(b=>b.onclick=()=>grade(c,+b.dataset.g));
+}
+function realCard(c){return S.decks.find(d=>d.id===c.deck.id).cards.find(x=>x.id===c.id)}
+function grade(c,g){
+  const r=realCard(c);
+  if(g===0)r.box=0; else if(g===2)r.box=Math.min(5,r.box+1);
+  r.due = g===0 ? today() : today()+INTERVALS[r.box]*DAY;
+  if(g===0&&mode==='due')queue.push({...r,deck:c.deck});
+  studied();save();qi++;showCard();stats();
+}
+
+/* ================= JOGOS ================= */
+let gTimer=null;
+function stopGame(){clearInterval(gTimer);gTimer=null;$('#gameArea').innerHTML='';$('#gameMenu').style.display='block';if(curView==='jogos')$('#levelBox').style.display='block'}
+function renderGameMenu(){
+  chips($('#gameChips'),renderGameMenu);
+  const b=S.best;
+  $('#best-mem').textContent=b.mem?`recorde: ${b.mem} jogadas`:'';
+  $('#best-vf').textContent=b.vf?`recorde: ${b.vf} pontos`:'';
+  $('#best-lig').textContent=b.lig?`melhor: ${b.lig} erro${b.lig==1?'':'s'}`:(b.lig===0?'melhor: sem erros ✨':'');
+  $('#best-quiz').textContent=b.quiz!=null?`melhor: ${b.quiz}%`:'';
+}
+document.querySelectorAll('.game').forEach(b=>b.onclick=()=>startGame(b.dataset.g));
+function startGame(g){
+  const p=pool();
+  const need={mem:3,vf:2,lig:3,quiz:4}[g];
+  if(p.length<need){toast(`Escolha temas com pelo menos ${need} cards`);return}
+  $('#gameMenu').style.display='none';$('#levelBox').style.display='none';window.scrollTo(0,0);
+  ({mem:gMem,vf:gVF,lig:gLig,quiz:gQuiz})[g](p);
+}
+function shell(title,inner){
+  $('#gameArea').innerHTML=`<button class="back-btn" id="gBack">← voltar pros jogos</button><h2>${title}</h2>${inner}`;
+  $('#gBack').onclick=()=>{stopGame();renderGameMenu()};
+}
+function endScreen(big,num,detail,again){
+  clearInterval(gTimer);gTimer=null;studied();renderGameMenu();
+  $('#gArea').innerHTML=`<div class="card empty"><div class="big">${big}</div>
+    <p style="font-size:38px;font-weight:700;margin:6px 0">${num}</p>${detail||''}
+    <div class="row" style="margin-top:14px"><button class="btn" style="flex:1" id="gOut">Outro jogo</button><button class="btn primary" style="flex:1" id="gAgain">Jogar de novo</button></div></div>`;
+  $('#gOut').onclick=()=>{stopGame();renderGameMenu()};
+  $('#gAgain').onclick=again;
+}
+const missList=m=>m.length?`<div class="stack" style="text-align:left;margin:14px 0 0"><p class="small muted">Pra revisar:</p>${m.map(c=>`<div class="list-card"><span><b>${esc(c.f)}</b><br><span class="muted">${esc(c.b)}</span></span></div>`).join('')}</div>`:'';
+// tira cards com respostas repetidas
+const uniq=arr=>{const seen=new Set();return arr.filter(c=>!seen.has(c.b)&&seen.add(c.b))};
+
+/* ---- Jogo da memória ---- */
+function gMem(p){
+  const cs=uniq(shuffle(p)).slice(0,6);
+  const tiles=shuffle(cs.flatMap(c=>[{c,t:'t'},{c,t:'r'}]));
+  let open=[],moves=0,found=0,sec=0,lock=false;
+  shell('🧠 Jogo da memória',`<div class="hud"><span>jogadas <b id="mMoves">0</b></span><span>pares <b id="mFound">0</b>/${cs.length}</span><span>⏱ <b id="mTime">0s</b></span></div>
+    <p class="small muted" style="margin-bottom:10px">Roxo = termo · vermelho = definição</p>
+    <div id="gArea"><div class="mem" id="memGrid">${tiles.map((x,i)=>`<button class="tile" data-i="${i}"><div class="tin"><div class="tf">?</div><div class="tb ${x.t}">${esc(x.t==='t'?x.c.f:x.c.b)}</div></div></button>`).join('')}</div></div>`);
+  gTimer=setInterval(()=>{sec++;const e=$('#mTime');if(e)e.textContent=sec+'s'},1000);
+  document.querySelectorAll('.tile').forEach(el=>el.onclick=()=>{
+    if(lock||el.classList.contains('open')||el.classList.contains('done'))return;
+    el.classList.add('open');open.push(el);
+    if(open.length<2)return;
+    moves++;$('#mMoves').textContent=moves;
+    const [a,b]=open.map(e=>tiles[+e.dataset.i]);
+    if(a.c.id===b.c.id&&a.t!==b.t){
+      open.forEach(e=>{e.classList.remove('open');e.classList.add('done')});open=[];found++;$('#mFound').textContent=found;
+      if(found===cs.length){
+        const rec=!S.best.mem||moves<S.best.mem; if(rec){S.best.mem=moves;save()}
+        setTimeout(()=>endScreen(rec?'novo recorde! 🏆':'achou tudo! 🎉',`${moves} jogadas`,`<p class="muted">em ${sec} segundos</p>`,()=>gMem(pool())),600);
+      }
+    }else{lock=true;setTimeout(()=>{open.forEach(e=>e.classList.remove('open'));open=[];lock=false},1000)}
+  });
+}
+
+/* ---- V ou F relâmpago ---- */
+function gVF(p){
+  let score=0,combo=0,left=60,miss=[],cur=null;
+  shell('⚡ V ou F relâmpago',`<div class="hud"><span>⏱ <b id="vTime">60</b>s</span><span>combo <b id="vCombo">0</b></span><span>pontos <b id="vScore">0</b></span></div>
+    <div id="gArea"><div class="bar" style="margin-bottom:12px"><i id="vBar" style="width:100%"></i></div>
+    <div class="card vf" id="vCard"></div>
+    <div class="vfb"><button class="btn g-bad" id="vF">Falso</button><button class="btn g-ok" id="vV">Verdadeiro</button></div></div>`);
+  function next(){
+    const c=p[Math.random()*p.length|0];
+    let truth=Math.random()<.5,shown=c.b;
+    if(!truth){
+      const same=c.deck.cards.filter(x=>x.b!==c.b),other=p.filter(x=>x.b!==c.b);
+      const src=same.length?same:other;
+      if(src.length)shown=src[Math.random()*src.length|0].b;else truth=true;
+    }
+    cur={c,truth};
+    $('#vCard').innerHTML=`<div class="small muted" style="margin-bottom:10px">${esc(c.deck.name)}</div><div class="term">${esc(c.f)}</div><div class="eq">é…</div><div class="def">${esc(shown)}</div>`;
+  }
+  function answer(v){
+    const card=$('#vCard');card.classList.remove('flash-ok','flash-bad');void card.offsetWidth;
+    if(v===cur.truth){combo++;score+=1+Math.floor(combo/5);card.classList.add('flash-ok')}
+    else{combo=0;if(!miss.some(m=>m.id===cur.c.id))miss.push(cur.c);card.classList.add('flash-bad')}
+    $('#vScore').textContent=score;$('#vCombo').textContent=combo;next();
+  }
+  $('#vV').onclick=()=>answer(true);$('#vF').onclick=()=>answer(false);
+  next();
+  gTimer=setInterval(()=>{left--;const t=$('#vTime');if(!t)return;t.textContent=left;$('#vBar').style.width=left/60*100+'%';
+    if(left<=0){const rec=score>(S.best.vf||0);if(rec){S.best.vf=score;save()}
+      endScreen(rec?'novo recorde! 🏆':'acabou o tempo!',`${score} pontos`,`<p class="muted small">a cada 5 acertos seguidos você ganha bônus</p>${missList(miss)}`,()=>gVF(pool()))}
+  },1000);
+}
+
+/* ---- Ligue os pares ---- */
+function gLig(p){
+  const rounds=3;let round=0,errors=0,missed=[];
+  shell('🔗 Ligue os pares',`<div class="hud"><span>rodada <b id="lRound">1</b>/${rounds}</span><span>erros <b id="lErr">0</b></span></div><div id="gArea"></div>`);
+  function play(){
+    const cs=uniq(shuffle(p)).slice(0,5);let selL=null,done=0;
+    $('#lRound').textContent=round+1;
+    $('#gArea').innerHTML=`<p class="small muted" style="margin-bottom:10px">Toque num termo e depois na definição dele.</p><div class="match">
+      <div class="mcol">${cs.map(c=>`<button class="mi l" data-id="${c.id}">${esc(c.f)}</button>`).join('')}</div>
+      <div class="mcol">${shuffle(cs).map(c=>`<button class="mi r" data-id="${c.id}">${esc(c.b)}</button>`).join('')}</div></div>`;
+    document.querySelectorAll('.mi.l').forEach(b=>b.onclick=()=>{if(b.classList.contains('ok'))return;document.querySelectorAll('.mi.l').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');selL=b});
+    document.querySelectorAll('.mi.r').forEach(b=>b.onclick=()=>{
+      if(!selL||b.classList.contains('ok'))return;
+      if(b.dataset.id===selL.dataset.id){
+        [b,selL].forEach(x=>{x.classList.remove('sel');x.classList.add('ok')});selL=null;done++;
+        if(done===cs.length){round++;if(round<rounds)setTimeout(play,500);else finish()}
+      }else{
+        errors++;$('#lErr').textContent=errors;
+        const c=cs.find(x=>x.id===selL.dataset.id);if(!missed.some(m=>m.id===c.id))missed.push(c);
+        b.classList.remove('bad');void b.offsetWidth;b.classList.add('bad');
+      }
+    });
+  }
+  function finish(){
+    const rec=S.best.lig==null||errors<S.best.lig;if(rec){S.best.lig=errors;save()}
+    endScreen(errors===0?'perfeito! ✨':rec?'novo recorde! 🏆':'boa!',`${errors} erro${errors===1?'':'s'}`,`<p class="muted">${rounds*5} pares ligados</p>${missList(missed)}`,()=>gLig(pool()));
+  }
+  play();
+}
+
+/* ---- Simulado ---- */
+function gQuiz(p){
+  const n=Math.min(10,p.length);
+  const qs=shuffle(p).slice(0,n).map(c=>{
+    const same=uniq(c.deck.cards.filter(x=>x.id!==c.id&&x.b!==c.b));
+    const other=uniq(p.filter(x=>x.deck.id!==c.deck.id&&x.b!==c.b));
+    let wrong=shuffle(same).slice(0,3);
+    if(wrong.length<3)wrong=wrong.concat(shuffle(other).slice(0,3-wrong.length));
+    return {c,opts:shuffle([c,...wrong])};
+  });
+  let i=0,score=0,miss=[];
+  shell('📝 Simulado','<div id="gArea"></div>');
+  function q(){
+    if(i>=qs.length){
+      const pct=Math.round(score/qs.length*100);
+      if(S.best.quiz==null||pct>S.best.quiz){S.best.quiz=pct;save()}
+      endScreen(pct>=70?'mandou bem!':pct>=40?'quase lá':'bora revisar',`${score}/${qs.length}`,missList(miss),()=>gQuiz(pool()));return;
+    }
+    const {c,opts}=qs[i];
+    $('#gArea').innerHTML=`<div class="card stack">
+      <div class="row between small muted"><span>${i+1} de ${qs.length}</span><span>${lvTag(c.deck)}${esc(c.deck.name)}</span></div>
+      <div class="bar"><i style="width:${i/qs.length*100}%"></i></div>
+      <p style="font-size:20px;font-weight:600;margin:8px 0">${esc(c.f)}</p>
+      ${opts.map(o=>`<button class="opt" data-id="${o.id}">${esc(o.b)}</button>`).join('')}
+      <button class="btn primary full" id="qNext" style="display:none">Próxima</button></div>`;
+    document.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{
+      const ok=b.dataset.id===c.id;if(ok)score++;else miss.push(c);
+      document.querySelectorAll('.opt').forEach(x=>{x.disabled=true;if(x.dataset.id===c.id)x.classList.add('right')});
+      if(!ok)b.classList.add('wrong');$('#qNext').style.display='block';
+    });
+    $('#qNext').onclick=()=>{i++;q()};
+  }
+  q();
+}
+
+/* ================= POMODORO ================= */
+const P=S.pomo,todayStr=new Date().toDateString();
+if(P.date!==todayStr){P.date=todayStr;P.done=0;save()}
+$('#tFocus').value=P.focus;$('#tBreak').value=P.brk;$('#tDone').textContent=P.done;
+let phase='focus',left=P.focus*60,total=left,timer=null,actx=null;
+const C=678.6;
+function drawT(){
+  $('#tTime').textContent=String(Math.floor(left/60)).padStart(2,'0')+':'+String(left%60).padStart(2,'0');
+  $('#tLabel').textContent=phase==='focus'?'foco':'pausa';
+  const fg=$('#ringFg');fg.style.strokeDashoffset=C*(1-left/total);
+  fg.style.stroke=phase==='focus'?'#ff5a45':'#5fd39a';
+}
+function beep(){try{if(!actx)return;[0,.25,.5].forEach(t=>{const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;o.connect(g);g.connect(actx.destination);g.gain.setValueAtTime(.2,actx.currentTime+t);g.gain.exponentialRampToValueAtTime(.001,actx.currentTime+t+.2);o.start(actx.currentTime+t);o.stop(actx.currentTime+t+.2)})}catch(e){}}
+function nextPhase(){
+  if(phase==='focus'){P.done++;studied();save();$('#tDone').textContent=P.done;phase='break';left=total=P.brk*60;toast('Pausa! Levanta, bebe água 💧')}
+  else{phase='focus';left=total=P.focus*60;toast('Bora pro próximo bloco')}
+  beep();drawT();
+}
+$('#tGo').onclick=()=>{
+  try{if(!actx)actx=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}
+  if(timer){clearInterval(timer);timer=null;$('#tGo').textContent='Continuar';return}
+  $('#tGo').textContent='Pausar';
+  timer=setInterval(()=>{left--;if(left<=0)nextPhase();drawT()},1000);
+};
+$('#tReset').onclick=()=>{clearInterval(timer);timer=null;phase='focus';left=total=P.focus*60;$('#tGo').textContent='Iniciar';drawT()};
+$('#tSkip').onclick=()=>nextPhase();
+['tFocus','tBreak'].forEach(id=>$('#'+id).onchange=()=>{
+  P.focus=Math.max(1,Math.min(90,+$('#tFocus').value||25));P.brk=Math.max(1,Math.min(30,+$('#tBreak').value||5));save();
+  if(!timer){left=total=(phase==='focus'?P.focus:P.brk)*60;drawT()}
+});
+drawT();
+
+/* ================= MEUS CARDS ================= */
+let openDeck=null;
+function renderDecks(){
+  let html='';
+  for(let l=1;l<=5;l++){
+    const ds=S.decks.filter(d=>d.lv===l);if(!ds.length)continue;
+    html+=`<div class="grp">${LV[l].s} semestre · ${LV[l].n}</div>`+ds.map(d=>{
+      const m=d.cards.filter(c=>c.box>=4).length;
+      return `<div class="deckitem"><button style="text-align:left;flex:1" data-open="${d.id}"><b>${esc(d.name)}</b><br><span class="small muted">${d.cards.length} cards · ${m} dominados</span></button><span class="muted">${openDeck===d.id?'⌄':'›'}</span></div>`}).join('');
+  }
+  $('#deckList').innerHTML=html;
+  document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{openDeck=openDeck===b.dataset.open?null:b.dataset.open;renderDecks()});
+  $('#addDeck').innerHTML=S.decks.map(d=>`<option value="${d.id}">${LV[d.lv].s} · ${esc(d.name)}</option>`).join('')+'<option value="__new">+ Novo tema…</option>';
+  $('#newDeckLv').innerHTML=LV.slice(1).map((l,i)=>`<option value="${i+1}">${l.s} semestre (${l.n})</option>`).join('');
+  if(openDeck)$('#addDeck').value=openDeck;
+  renderDetail();
+}
+function renderDetail(){
+  const d=S.decks.find(x=>x.id===openDeck),el=$('#deckDetail');
+  if(!d){el.innerHTML='';return}
+  el.innerHTML=`<h2 style="margin-top:22px">${esc(d.name)}</h2><div class="card stack">
+    ${d.cards.map(c=>`<div class="list-card"><span><b>${esc(c.f)}</b><br><span class="muted">${esc(c.b)}</span></span><button class="x" data-del="${c.id}" aria-label="apagar">✕</button></div>`).join('')||'<p class="muted small">Sem cards ainda.</p>'}
+    <button class="btn ghost full small" id="delDeck" style="color:#ff8a7a">Apagar tema inteiro</button></div>`;
+  el.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{d.cards=d.cards.filter(c=>c.id!==b.dataset.del);save();renderDecks()});
+  let armed=false;
+  $('#delDeck').onclick=e=>{
+    if(!armed){armed=true;e.target.textContent='Toque de novo pra confirmar';return}
+    S.decks=S.decks.filter(x=>x.id!==d.id);S.sel=S.sel.filter(x=>x!==d.id);S.removed.push(d.id);openDeck=null;save();renderDecks();toast('Tema apagado');
+  };
+}
+$('#addDeck').onchange=()=>{$('#newDeckBox').style.display=$('#addDeck').value==='__new'?'block':'none'};
+$('#addForm').onsubmit=e=>{
+  e.preventDefault();
+  let did=$('#addDeck').value;
+  if(did==='__new'){
+    const name=$('#newDeckName').value.trim();if(!name){toast('Dá um nome pro tema');return}
+    did='d'+Date.now();S.decks.push({id:did,lv:+$('#newDeckLv').value,name,cards:[]});S.sel.push(did);
+  }
+  S.decks.find(x=>x.id===did).cards.push({id:'c'+Date.now(),f:$('#addFront').value.trim(),b:$('#addBack').value.trim(),box:0,due:0});
+  save();$('#addFront').value='';$('#addBack').value='';$('#newDeckName').value='';$('#newDeckBox').style.display='none';
+  openDeck=did;renderDecks();toast('Card criado ✓');
+};
+$('#bCopy').onclick=async()=>{
+  const txt=JSON.stringify({decks:S.decks,removed:S.removed});
+  try{await navigator.clipboard.writeText(txt);toast('Backup copiado ✓')}
+  catch(e){$('#impBox').style.display='block';$('#impText').value=txt;$('#impText').select();toast('Selecione e copie o texto')}
+};
+$('#bShowImp').onclick=()=>{const b=$('#impBox');b.style.display=b.style.display==='none'?'block':'none';$('#impText').value=''};
+$('#bImp').onclick=()=>{
+  try{const o=JSON.parse($('#impText').value);if(!Array.isArray(o.decks))throw 0;
+    S.decks=o.decks.map(d=>({...d,lv:d.lv||1}));S.removed=o.removed||[];S.sel=S.decks.map(d=>d.id);save();renderDecks();toast('Importado ✓');$('#impBox').style.display='none'}
+  catch(e){toast('Backup inválido')}
+};
+let rArmed=false;
+$('#bReset').onclick=e=>{
+  if(!rArmed){rArmed=true;e.target.textContent='Toque de novo pra confirmar';return}
+  S.decks.forEach(d=>d.cards.forEach(c=>{c.box=0;c.due=0}));S.best={};save();rArmed=false;e.target.textContent='Resetar progresso das revisões';toast('Progresso zerado');
+};
+
+renderLevels();renderCards();
+</script>
+</body>
+</html>
